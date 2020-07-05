@@ -1,10 +1,9 @@
-{ pkgs, jgnssrc }:
-with pkgs.python3Packages;
-
+{ jgnssrc, python3Packages, runCommand, coreutils, cryptsetup, dosfstools
+, e2fsprogs, gptfdisk, lvm2, openssl, procps-ng, rsync, stow, sudo, utillinux }:
 let
   gen-package = { name, text }:
     let
-      pysrc = pkgs.runCommand "${name}-gen-package" {
+      pysrc = runCommand "${name}-gen-package" {
         inherit text;
         passAsFile = [ "text" ];
         preferLocalBuild = true;
@@ -26,7 +25,7 @@ let
         touch "${name}/py.typed"
         popd
       '';
-    in buildPythonPackage rec {
+    in python3Packages.buildPythonPackage rec {
       inherit name;
       src = "${pysrc}";
     };
@@ -34,26 +33,26 @@ let
   jgns-deps = gen-package {
     name = "jgns_deps";
     text = ''
-      coreutils = "${pkgs.coreutils}"
-      cryptsetup = "${pkgs.cryptsetup}"
-      dosfstools = "${pkgs.dosfstools}"
-      e2fsprogs = "${pkgs.e2fsprogs}"
-      gptfdisk = "${pkgs.gptfdisk}"
-      lvm2 = "${pkgs.lvm2}"
-      openssl = "${pkgs.openssl}"
-      procps_ng = "${pkgs.procps-ng}"
-      rsync = "${pkgs.rsync}"
-      stow = "${pkgs.stow}"
-      sudo = "${pkgs.sudo}"
-      utillinux = "${pkgs.utillinux}"
+      coreutils = "${coreutils}"
+      cryptsetup = "${cryptsetup}"
+      dosfstools = "${dosfstools}"
+      e2fsprogs = "${e2fsprogs}"
+      gptfdisk = "${gptfdisk}"
+      lvm2 = "${lvm2}"
+      openssl = "${openssl}"
+      procps_ng = "${procps-ng}"
+      rsync = "${rsync}"
+      stow = "${stow}"
+      sudo = "${sudo}"
+      utillinux = "${utillinux}"
     '';
   };
 
-  pydeps = [ toml jgns-deps ];
-in buildPythonPackage rec {
+  pydeps = with python3Packages; [ toml jgns-deps ];
+in python3Packages.buildPythonPackage rec {
   name = "jgns";
   src = jgnssrc;
-  nativeBuildInputs = [ black flake8 mypy ];
+  nativeBuildInputs = with python3Packages; [ black flake8 mypy ];
   propagatedBuildInputs = pydeps;
   shellHook = ''
     export MYPYPATH=$(toPythonPath "${builtins.concatStringsSep " " pydeps}")

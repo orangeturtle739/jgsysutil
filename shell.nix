@@ -1,4 +1,1 @@
-import ./common.nix {
-  pkgs = import <nixpkgs> { };
-  jgnssrc = ./setup.py;
-}
+(import <nixpkgs> { }).callPackage ./common.nix { jgnssrc = ./setup.py; }

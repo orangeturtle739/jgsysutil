@@ -1,5 +1,1 @@
-{ pkgs }:
-import ./common.nix {
-  inherit pkgs;
-  jgnssrc = ./.;
-}
+{ callPackage }: callPackage ./common.nix { jgnssrc = ./.; }
