@@ -27,6 +27,11 @@ def main() -> int:
         "--config-file",
         help=f"Path to configuration file. Defaults to {config.DEFAULT_PATH}",
     )
+    parser.add_argument(
+        "--no-sudo-user",
+        help=f"Do not use the SUDO_USER environment variable to resolve ~ in paths",
+        action="store_true",
+    )
     register_subcommands(
         parser,
         title="cmd",
@@ -42,7 +47,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    config_options = config.get(make_path(args.config_file))
+    config_options = config.get(make_path(args.config_file), not args.no_sudo_user)
     if config_options is None:
         print(f"Error reading configuration file: {args.config_file}")
         return 1

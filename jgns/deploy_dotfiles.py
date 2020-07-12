@@ -4,6 +4,7 @@ import typing as t
 import subprocess
 from pathlib import Path
 from jgns.commands import stow
+from jgns.expanduser import expanduser
 
 
 class DeployDotfiles(Subcommand):
@@ -22,10 +23,13 @@ class DeployDotfiles(Subcommand):
         if args.dotfiles_dir is None:
             print("--dotfiles-dir required")
             return 1
-        dotfiles_dir = Path(args.dotfiles_dir).expanduser()
+        dotfiles_dir = expanduser(
+            Path(args.dotfiles_dir).expanduser(), not args.no_sudo_user
+        )
         if not dotfiles_dir.is_dir():
             print(f"Not a directory: {dotfiles_dir}")
             return 1
         return subprocess.run(
-            [stow, "-vv", "-t", Path("~").expanduser(), "."], cwd=dotfiles_dir
+            [stow, "-vv", "-t", expanduser(Path("~"), not args.no_sudo_user), "."],
+            cwd=dotfiles_dir,
         ).returncode

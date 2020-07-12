@@ -5,6 +5,7 @@ import subprocess
 import socket
 import os
 from pathlib import Path
+from jgns.expanduser import expanduser
 from jgns.commands import rsync, nixos_rebuild
 
 
@@ -35,7 +36,7 @@ class DeployNixos(Subcommand):
         if args.nixos_dir is None:
             print("--nixos-dir required")
             return 1
-        nixos_dir = Path(args.nixos_dir).expanduser()
+        nixos_dir = expanduser(Path(args.nixos_dir), not args.no_sudo_user)
         if not nixos_dir.is_dir():
             print(f"Not a directory: {nixos_dir}")
             return 1

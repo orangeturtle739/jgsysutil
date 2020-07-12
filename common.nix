@@ -53,7 +53,7 @@ in python3Packages.buildPythonPackage rec {
   src = jgnssrc;
   nativeBuildInputs = with python3Packages; [ black flake8 mypy ];
   propagatedBuildInputs = pydeps;
-  shellHook = ''
+  postShellHook = ''
     export MYPYPATH=$(toPythonPath "${builtins.concatStringsSep " " pydeps}")
   '';
 }
