@@ -1,5 +1,5 @@
 { jgnssrc, python3Packages, runCommand, coreutils, cryptsetup, dosfstools
-, e2fsprogs, gptfdisk, lvm2, openssl, procps-ng, rsync, stow, sudo, utillinux }:
+, e2fsprogs, gptfdisk, lvm2, openssl, procps-ng, rsync, stow, utillinux }:
 let
   gen-package = { name, text }:
     let
@@ -43,7 +43,6 @@ let
       procps_ng = "${procps-ng}"
       rsync = "${rsync}"
       stow = "${stow}"
-      sudo = "${sudo}"
       utillinux = "${utillinux}"
     '';
   };

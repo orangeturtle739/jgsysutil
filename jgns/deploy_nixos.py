@@ -3,8 +3,9 @@ import argparse
 import typing as t
 import subprocess
 import socket
+import os
 from pathlib import Path
-from jgns.commands import sudo, rsync, nixos_rebuild
+from jgns.commands import rsync, nixos_rebuild
 
 
 class DeployNixos(Subcommand):
@@ -28,6 +29,9 @@ class DeployNixos(Subcommand):
         )
 
     def run(self, args: t.Any) -> int:
+        if os.geteuid() != 0:
+            print("Must be root")
+            return 1
         if args.nixos_dir is None:
             print("--nixos-dir required")
             return 1
@@ -48,7 +52,6 @@ class DeployNixos(Subcommand):
 
         rsync_status = subprocess.run(
             [
-                sudo,
                 rsync,
                 "--archive",
                 "--delete",
@@ -66,6 +69,4 @@ class DeployNixos(Subcommand):
         Path("/etc/nixos/configuration.nix").symlink_to(
             Path("/etc/nixos") / hostname_config_base
         )
-        return subprocess.run(
-            [sudo, nixos_rebuild, "switch", "--show-trace"]
-        ).returncode
+        return subprocess.run([nixos_rebuild, "switch", "--show-trace"]).returncode

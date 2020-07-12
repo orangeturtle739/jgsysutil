@@ -2,7 +2,8 @@ from jgns.subcommand import Subcommand
 import argparse
 import typing as t
 import subprocess
-from jgns.commands import sudo, nixos_rebuild, nix_channel
+import os
+from jgns.commands import nixos_rebuild, nix_channel
 
 
 class UpdateSystem(Subcommand):
@@ -16,7 +17,10 @@ class UpdateSystem(Subcommand):
         pass
 
     def run(self, args: t.Any) -> int:
-        status = subprocess.run([sudo, nix_channel, "--update"]).returncode
+        if os.geteuid() != 0:
+            print("Must be root")
+            return 1
+        status = subprocess.run([nix_channel, "--update"]).returncode
         if status != 0:
             return status
-        return subprocess.run([sudo, nixos_rebuild, "--upgrade", "switch"]).returncode
+        return subprocess.run([nixos_rebuild, "--upgrade", "switch"]).returncode
