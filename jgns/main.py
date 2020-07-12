@@ -8,7 +8,7 @@ from jgns.deploy_nixos import DeployNixos
 from jgns.deploy_dotfiles import DeployDotfiles
 from jgns.update_user import UpdateUser
 from jgns.update_system import UpdateSystem
-from jgns.format_drive import FormatDrive
+from jgns.prepare_drive import PrepareDrive
 from pathlib import Path
 from jgns import config
 import sys
@@ -42,7 +42,7 @@ def main() -> int:
             DeployDotfiles(),
             UpdateUser(),
             UpdateSystem(),
-            FormatDrive(),
+            PrepareDrive(),
         ],
     )
     args = parser.parse_args()
