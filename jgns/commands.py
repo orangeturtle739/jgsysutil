@@ -14,7 +14,6 @@ mount = Path(jgns_deps.utillinux) / "bin/mount"
 openssl = Path(jgns_deps.openssl) / "bin/openssl"
 pvcreate = Path(jgns_deps.lvm2) / "bin/pvcreate"
 rsync = Path(jgns_deps.rsync) / "bin/rsync"
-stow = Path(jgns_deps.stow) / "bin/stow"
 swapon = Path(jgns_deps.utillinux) / "bin/swapon"
 vgcreate = Path(jgns_deps.lvm2) / "bin/vgcreate"
 
@@ -22,4 +21,5 @@ vgcreate = Path(jgns_deps.lvm2) / "bin/vgcreate"
 # version of these commands.
 nix_env = "nix-env"
 nix_channel = "nix-channel"
+nix_shell = "nix-shell"
 nixos_rebuild = "nixos-rebuild"

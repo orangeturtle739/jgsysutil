@@ -146,7 +146,6 @@ class PrepareDrive(Subcommand):
 
     def configure(self, parser: argparse.ArgumentParser) -> None:
         dst_group = parser.add_mutually_exclusive_group(required=True)
-        dst_group.target = "dst"
         dst_group.add_argument(
             "--drive", help="drive to parition and then use (/dev/whatever)"
         )

@@ -1,5 +1,5 @@
 { jgnssrc, python3Packages, runCommand, coreutils, cryptsetup, dosfstools
-, e2fsprogs, gptfdisk, lvm2, openssl, procps-ng, rsync, stow, utillinux }:
+, e2fsprogs, gptfdisk, lvm2, openssl, procps-ng, rsync, utillinux }:
 let
   gen-package = { name, text }:
     let
@@ -42,12 +42,19 @@ let
       openssl = "${openssl}"
       procps_ng = "${procps-ng}"
       rsync = "${rsync}"
-      stow = "${stow}"
       utillinux = "${utillinux}"
     '';
   };
 
-  pydeps = with python3Packages; [ toml jgns-deps ];
+  xdg = python3Packages.buildPythonPackage rec {
+    pname = "xdg";
+    version = "4.0.1";
+    src = python3Packages.fetchPypi {
+      inherit pname version;
+      sha256 = "0mzcbnilpy1ss31fpnfqmrg4qzpasvpmbvm3cpvvlk1rxyfwjff9";
+    };
+  };
+  pydeps = with python3Packages; [ toml jgns-deps xdg ];
 in python3Packages.buildPythonPackage rec {
   name = "jgns";
   src = jgnssrc;

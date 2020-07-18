@@ -5,10 +5,10 @@ from jgns.subcommand import register_subcommands, invoke_subcommand
 from jgns.randomize_drive import RandomizeDrive
 from jgns.install_user import InstallUser
 from jgns.deploy_nixos import DeployNixos
-from jgns.deploy_dotfiles import DeployDotfiles
 from jgns.update_user import UpdateUser
 from jgns.update_system import UpdateSystem
 from jgns.prepare_drive import PrepareDrive
+from jgns.init_user import InitUser
 from pathlib import Path
 from jgns import config
 import sys
@@ -39,10 +39,10 @@ def main() -> int:
             RandomizeDrive(),
             InstallUser(),
             DeployNixos(),
-            DeployDotfiles(),
             UpdateUser(),
             UpdateSystem(),
             PrepareDrive(),
+            InitUser(),
         ],
     )
     args = parser.parse_args()
