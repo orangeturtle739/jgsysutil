@@ -1,47 +1,44 @@
-from jgns.subcommand import Subcommand
-import typing as t
-import argparse
 import dataclasses
-import subprocess
-import uuid
 import math
-from jgns.randomize_drive import randomize_drive
-from jgns.typing import assert_never
-from getpass import getpass
+import re
+import subprocess
+import typing as t
+import uuid
 from pathlib import Path
-from jgns.commands import (
+
+import click
+
+from jgsysutil.commands import (
     cryptsetup,
-    gdisk,
-    pvcreate,
-    vgcreate,
-    lvcreate,
-    swapon,
     free,
-    mount,
+    gdisk,
+    lvcreate,
     mkdir,
-    mkswap,
     mkfs_ext4,
     mkfs_fat,
+    mkswap,
+    mount,
+    pvcreate,
+    swapon,
+    vgcreate,
 )
+from jgsysutil.randomize_drive import randomize_drive_lib
+from jgsysutil.typing import assert_never
 
 
 def partition_path(drive_path: Path, pnum: int) -> Path:
     parent, name = drive_path.parent, drive_path.name
-    if name.startswith("sd"):
-        return parent / f"{name}{pnum}"
-    elif name.startswith("nvme") or name.startswith("loop"):
-        return parent / f"{name}p{pnum}"
-    else:
-        raise ValueError(f"Unknown drive type: {drive_path}")
+    separator = "p" if re.match(r".*\d", name) else ""
+    return parent / f"{name}{separator}{pnum}"
 
 
 def total_mem() -> int:
     for line in subprocess.run(
-        [free, "--gibi"], text=True, stdout=subprocess.PIPE, check=True
+        [free], text=True, stdout=subprocess.PIPE, check=True
     ).stdout.splitlines():
         if line.startswith("Mem: "):
             return int(line.split()[1])
-    raise ValueError()
+    raise ValueError("Unable to determine total memory")
 
 
 @dataclasses.dataclass
@@ -89,9 +86,12 @@ def configure_drive(
     swap_name = f"{prefix}_swap"
     root_name = f"{prefix}_root"
 
-    swap_size = swap_size or f"{2**math.ceil(math.log2(total_mem()))}G"
+    if swap_size is None:
+        x = total_mem()
+        # Round up to at least 1G of swap
+        swap_size = f"{2**math.ceil(math.log2(min(1024 * 1024, x) / 1024 / 1024))}G"
     if randomize:
-        randomize_drive(partitions.root)
+        randomize_drive_lib(partitions.root)
     subprocess.run(
         [cryptsetup, "luksFormat", partitions.root],
         input=passwd,
@@ -105,7 +105,7 @@ def configure_drive(
         text=True,
         check=True,
     )
-    subprocess.run([pvcreate, f"/dev/mapper/{luks_mapper_name}"], check=True)
+    subprocess.run([pvcreate, "-y", f"/dev/mapper/{luks_mapper_name}"], check=True)
     subprocess.run([vgcreate, vg_name, f"/dev/mapper/{luks_mapper_name}"], check=True)
     subprocess.run([lvcreate, "-L", swap_size, "-n", swap_name, vg_name], check=True)
     subprocess.run([lvcreate, "-l", "100%FREE", "-n", root_name, vg_name], check=True)
@@ -120,65 +120,74 @@ def configure_drive(
     subprocess.run([swapon, f"/dev/{vg_name}/{swap_name}"], check=True)
 
 
-def run(
-    dst: t.Union[Path, PartitionScheme],
+blkdevice = click.Path(
+    exists=True, file_okay=True, dir_okay=False, writable=True, resolve_path=True
+)
+
+
+@click.command()
+@click.option(
+    "--drive", type=blkdevice, help="drive to parition and then use (/dev/whatever)",
+)
+@click.option(
+    "--boot", type=blkdevice, help="The boot partition",
+)
+@click.option(
+    "--root", type=blkdevice, help="The boot partition",
+)
+@click.option(
+    "--randomize/--no-randomize",
+    default=False,
+    help="Randomize the root partition before encrypting",
+)
+@click.option(
+    "--swap-size", help="swap size, defaults to 2**n G where 2**n G >= total memory"
+)
+@click.option(
+    "--mount",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True, resolve_path=True),
+    help="directory to mount new the the system in",
+    required=True,
+)
+@click.password_option()
+@click.confirmation_option(prompt="Are you sure?")
+def prepare_drive(
+    drive: t.Optional[str],
+    boot: t.Optional[str],
+    root: t.Optional[str],
     randomize: bool,
     swap_size: t.Optional[str],
-    mount_point: Path,
-    passwd: str,
+    mount: str,
+    password: str,
 ) -> None:
-    if isinstance(dst, Path):
-        partitions = partition_drive(dst)
+    """
+    Prepare a drive for a nixos installation.
+
+    The drive can be specified with either --drive or both --root and --boot.
+    --drive expects an entire block device, and will create a new GPT partition table
+    on the device. --root and --boot both expect partitions.
+
+    If --randomize is set, then the root partition is randomized.
+    """
+    dst: t.Union[str, PartitionScheme]
+    if drive is not None:
+        if boot is not None or root is not None:
+            raise click.UsageError(
+                "--boot and --root must not be used when --drive is set"
+            )
+        dst = drive
+    elif boot is not None and root is not None:
+        dst = PartitionScheme(boot=Path(boot), root=Path(root))
+    elif boot is None and root is None:
+        raise click.UsageError("[--drive] or [--root --boot] must be set")
+    else:
+        raise click.UsageError("both --root and --boot are required")
+
+    if isinstance(dst, str):
+        partitions = partition_drive(Path(dst))
     elif isinstance(dst, PartitionScheme):
         partitions = dst
     else:
         assert_never(dst)
 
-    configure_drive(partitions, randomize, swap_size, mount_point, passwd)
-
-
-class PrepareDrive(Subcommand):
-    def name(self) -> str:
-        return "prepare-drive"
-
-    def help(self) -> str:
-        return "Prepare a drive for a nixos installation."
-
-    def configure(self, parser: argparse.ArgumentParser) -> None:
-        dst_group = parser.add_mutually_exclusive_group(required=True)
-        dst_group.add_argument(
-            "--drive", help="drive to parition and then use (/dev/whatever)"
-        )
-        dst_group.add_argument(
-            "--partitions",
-            nargs=2,
-            metavar=("BOOT", "ROOT"),
-            help="use the following partitions",
-        )
-        parser.add_argument(
-            "--randomize",
-            action="store_true",
-            help="Randomize root partition before encrypting",
-        )
-        parser.add_argument(
-            "--swap-size",
-            help="swap size, defaults to 2**n G where 2**n G >= total memory",
-        )
-        parser.add_argument(
-            "--mount", required=True, help="directory to mount system in"
-        )
-
-    def run(self, args: t.Any) -> int:
-        passwd = getpass("Password: ")
-        confirm = getpass("Confirm : ")
-        if passwd != confirm:
-            raise ValueError("Passwords do not match")
-        dst: t.Union[Path, PartitionScheme]
-        if args.drive is not None:
-            dst = Path(args.drive)
-        else:
-            dst = PartitionScheme(
-                boot=Path(args.partitions[0]), root=Path(args.partitions[1])
-            )
-        run(dst, args.randomize, args.swap_size, Path(args.mount), passwd)
-        return 0
+    configure_drive(partitions, randomize, swap_size, Path(mount), password)

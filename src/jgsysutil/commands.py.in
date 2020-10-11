@@ -1,0 +1,34 @@
+from pathlib import Path
+
+# fmt: off
+cryptsetup = Path("@CRYPTSETUP@")
+dd = Path("@DD@")
+free = Path("@FREE@")
+gdisk = Path("@GDISK@")
+lvcreate = Path("@LVCREATE@")
+mkdir = Path("@MKDIR@")
+mkfs_ext4 = Path("@MKFS_EXT4@")
+mkfs_fat = Path("@MKFS_FAT@")
+mkswap = Path("@MKSWAP@")
+mount = Path("@MOUNT@")
+umount = Path("@UMOUNT@")
+openssl = Path("@OPENSSL@")
+shred = Path("@SHRED@")
+pvcreate = Path("@PVCREATE@")
+rsync = Path("@RSYNC@")
+swapon = Path("@SWAPON@")
+swapoff = Path("@SWAPOFF@")
+vgcreate = Path("@VGCREATE@")
+vgchange = Path("@VGCHANGE@")
+lvdisplay = Path("@LVDISPLAY@")
+losetup = Path("@LOSETUP@")
+lsblk = Path("@LSBLK@")
+# fmt: on
+
+
+# These are special -- we want to use the "system"
+# version of these commands.
+nix_env = "nix-env"
+nix_channel = "nix-channel"
+nix_shell = "nix-shell"
+nixos_rebuild = "nixos-rebuild"

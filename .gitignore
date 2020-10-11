@@ -1,4 +1,12 @@
 *.egg-info
 *.pyc
 *.swp
+*.stamp
+src/jgsysutil/commands.py
 .mypy_cache
+.envrc
+.direnv
+build
+dist
+VERSION
+result

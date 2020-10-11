@@ -1,6 +1,14 @@
-all:
-	@cached-nix-shell --pure --command ./lint
+all: build/Makefile
+	make --no-print-directory --directory=build -j$(shell nproc) develop
 
-.PHONY: format
-format:
-	@cached-nix-shell --pure --command ./format
+format: build/Makefile
+	make --no-print-directory --directory=build -j$(shell nproc) format
+
+build/Makefile:
+	mkdir -p build
+	cd build && cmake ..
+
+.PHONY: clean
+clean:
+	test build/Makefile && make --no-print-directory --directory=build clean
+	rm -rf build
