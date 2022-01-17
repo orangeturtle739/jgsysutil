@@ -6,8 +6,12 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.unicmake.url = "github:orangeturtle739/unicmake";
   # inputs.unicmake.url = "/home/jacob/Documents/MyStuff/projects/unicmake";
+  inputs.flake-compat = {
+    url = github:edolstra/flake-compat;
+    flake = false;
+  };
 
-  outputs = { self, nixpkgs, dirstamp, flake-utils, unicmake }:
+  outputs = { self, nixpkgs, dirstamp, flake-utils, unicmake, flake-compat }:
     flake-utils.lib.eachSystem ([ "aarch64-linux" "i686-linux" "x86_64-linux" ])
     (system:
       let
