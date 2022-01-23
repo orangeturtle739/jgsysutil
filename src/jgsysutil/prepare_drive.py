@@ -127,13 +127,19 @@ blkdevice = click.Path(
 
 @click.command()
 @click.option(
-    "--drive", type=blkdevice, help="drive to parition and then use (/dev/whatever)",
+    "--drive",
+    type=blkdevice,
+    help="drive to parition and then use (/dev/whatever)",
 )
 @click.option(
-    "--boot", type=blkdevice, help="The boot partition",
+    "--boot",
+    type=blkdevice,
+    help="The boot partition",
 )
 @click.option(
-    "--root", type=blkdevice, help="The boot partition",
+    "--root",
+    type=blkdevice,
+    help="The boot partition",
 )
 @click.option(
     "--randomize/--no-randomize",

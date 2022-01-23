@@ -1,7 +1,6 @@
 import subprocess
 
 import pytest
-
 from block_util import is_random, is_zero
 from loop_device import loop_device
 

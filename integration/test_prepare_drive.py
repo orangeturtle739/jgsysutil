@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+from loop_device import loop_device
 
 from jgsysutil.commands import (
     cryptsetup,
@@ -17,7 +18,6 @@ from jgsysutil.commands import (
     umount,
     vgchange,
 )
-from loop_device import loop_device
 
 LsblkOut = t.List[t.Dict[str, t.Any]]
 
@@ -223,7 +223,12 @@ def test_explicit_partitions(randomize: bool) -> None:
                 assert len(boot_info) == 1
                 assert len(root_info) == 1
                 check_partitions(
-                    boot_info[0], root_info[0], Path(mountdir), "3G", "2G", "1G",
+                    boot_info[0],
+                    root_info[0],
+                    Path(mountdir),
+                    "3G",
+                    "2G",
+                    "1G",
                 )
 
 

@@ -1,13 +1,13 @@
 {
   description = "Various usefull tools for managing linux systems";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-20.03";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.05";
   inputs.dirstamp.url = "github:orangeturtle739/dirstamp";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.unicmake.url = "github:orangeturtle739/unicmake";
   # inputs.unicmake.url = "/home/jacob/Documents/MyStuff/projects/unicmake";
   inputs.flake-compat = {
-    url = github:edolstra/flake-compat;
+    url = "github:edolstra/flake-compat";
     flake = false;
   };
 

@@ -33,10 +33,14 @@ def loop_device(size_mb: int) -> t.Iterator[Path]:
     finally:
         if loop is not None:
             subprocess.run(
-                [losetup, "--detach", loop], check=True,
+                [losetup, "--detach", loop],
+                check=True,
             )
             active = subprocess.run(
-                [losetup, "-a"], check=True, capture_output=True, text=True,
+                [losetup, "-a"],
+                check=True,
+                capture_output=True,
+                text=True,
             ).stdout.splitlines()
             for a in active:
                 path = a.split(":")[0]
