@@ -143,11 +143,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1642973999,
-        "narHash": "sha256-5b3xsikAGzml3O0ZCMIxk5pcWa/VW1dQMutj0qFzzeM=",
+        "lastModified": 1643347191,
+        "narHash": "sha256-XK5yLzGjzLxatYeDWS4c3W5WeDfuE6y2i/MqNcQK/Ds=",
         "owner": "orangeturtle739",
         "repo": "unicmake",
-        "rev": "4d2f9f6d76d20c097fab601ae42b2bbed93ffcce",
+        "rev": "85824b01bdc2d8cd38d86ce7bd066bed70e1059c",
         "type": "github"
       },
       "original": {
