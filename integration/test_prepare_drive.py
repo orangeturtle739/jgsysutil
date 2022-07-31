@@ -26,7 +26,8 @@ def lsblk_output_find(
     blockdevices_json: LsblkOut, fname: str, target: str
 ) -> t.Optional[str]:
     for dev in blockdevices_json:
-        if dev.get(fname, None) == target:
+        got = dev.get(fname, None)
+        if (isinstance(got, list) and target in got) or got == target:
             return dev["name"]
         x = lsblk_output_find(dev.get("children", []), fname, target)
         if x is not None:
@@ -35,7 +36,7 @@ def lsblk_output_find(
 
 
 def find_swap(blockdevices_json: LsblkOut) -> t.Optional[str]:
-    return lsblk_output_find(blockdevices_json, "mountpoint", "[SWAP]")
+    return lsblk_output_find(blockdevices_json, "mountpoints", "[SWAP]")
 
 
 def find_crypt(blockdevices_json: LsblkOut) -> t.Optional[str]:
@@ -107,7 +108,7 @@ def check_partitions(
     swap_size: str,
 ) -> None:
     assert boot_info["size"] == "512M"
-    assert boot_info["mountpoint"] == str(mountdir / "boot")
+    assert boot_info["mountpoints"][0] == str(mountdir / "boot")
     assert root_info["size"] == crypt_size
     assert len(root_info["children"]) == 1
     crypt = root_info["children"][0]
@@ -123,10 +124,10 @@ def check_partitions(
     assert root["name"].endswith("_root")
     assert swap["size"] == swap_size
     assert swap["type"] == "lvm"
-    assert swap["mountpoint"] == "[SWAP]"
+    assert swap["mountpoints"][0] == "[SWAP]"
     assert root["size"] == root_size
     assert root["type"] == "lvm"
-    assert root["mountpoint"] == str(mountdir)
+    assert root["mountpoints"][0] == str(mountdir)
 
 
 @pytest.mark.parametrize("randomize", [True, False])

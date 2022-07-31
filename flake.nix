@@ -1,10 +1,19 @@
 {
   description = "Various usefull tools for managing linux systems";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.05";
-  inputs.dirstamp.url = "github:orangeturtle739/dirstamp";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.unicmake.url = "github:orangeturtle739/unicmake";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
+  inputs.dirstamp = {
+    url = "github:orangeturtle739/dirstamp";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+  inputs.flake-utils = {
+    url = "github:numtide/flake-utils";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+  inputs.unicmake = {
+    url = "github:orangeturtle739/unicmake";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
   # inputs.unicmake.url = "/home/jacob/Documents/MyStuff/projects/unicmake";
   inputs.flake-compat = {
     url = "github:edolstra/flake-compat";
@@ -38,11 +47,6 @@
           mypy
           wrapPython
         ];
-        mypy_hook = pkgs.makeSetupHook { } (pkgs.writeScript "mypy_hook" ''
-          export MYPYPATH=$(toPythonPath "${
-            builtins.concatStringsSep " " pydeps
-          }")
-        '');
         jgsysutil = pkgs.stdenv.mkDerivation rec {
           pname = "jgsysutil";
           version =
@@ -54,7 +58,6 @@
             dirstamp.defaultPackage.${system}
           ];
           buildInputs = with pkgs; [
-            mypy_hook
             unicmake.defaultPackage.${system}
             coreutils
             cryptsetup
@@ -63,7 +66,7 @@
             gptfdisk
             lvm2
             openssl
-            procps-ng
+            procps
             rsync
             utillinux
           ];
@@ -89,7 +92,7 @@
           '';
         };
         integration = pkgs.nixosTest {
-          machine = { config, pkgs, ... }: {
+          nodes.machine = { config, pkgs, ... }: {
             environment.systemPackages = [ jgsysutil ];
             # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/qemu-vm.nix#L280
             virtualisation.memorySize = 1024;
