@@ -89,7 +89,7 @@ def configure_drive(
     if swap_size is None:
         x = total_mem()
         # Round up to at least 1G of swap
-        swap_size = f"{2**math.ceil(math.log2(min(1024 * 1024, x) / 1024 / 1024))}G"
+        swap_size = f"{2**math.ceil(math.log2(max(1024 * 1024, x) / 1024 / 1024))}G"
     if randomize:
         randomize_drive_lib(partitions.root)
     subprocess.run(
