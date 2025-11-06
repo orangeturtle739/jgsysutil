@@ -165,7 +165,7 @@ def test_basic(randomize: bool) -> None:
                 p1 = partitions[boot_partition.name]
                 p2 = partitions[root_partition.name]
                 assert len(partitions) == 2
-                check_partitions(p1, p2, Path(mountdir), "3.5G", "2.5G", "1G")
+                check_partitions(p1, p2, Path(mountdir), "3.5G", "1.5G", "2G")
 
 
 @pytest.mark.parametrize("randomize", [True, False])
@@ -228,8 +228,8 @@ def test_explicit_partitions(randomize: bool) -> None:
                     root_info[0],
                     Path(mountdir),
                     "3G",
+                    "1004M",
                     "2G",
-                    "1G",
                 )
 
 

@@ -1,7 +1,7 @@
 {
   description = "Various usefull tools for managing linux systems";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
   inputs.dirstamp = {
     url = "github:orangeturtle739/dirstamp";
     inputs.nixpkgs.follows = "nixpkgs";
@@ -90,7 +90,7 @@
             nodes.machine = { config, pkgs, ... }: {
               environment.systemPackages = [ jgsysutil ];
               # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/virtualisation/qemu-vm.nix#L280
-              virtualisation.memorySize = 1024;
+              virtualisation.memorySize = 2048;
               virtualisation.diskSize = 8192;
             };
             testScript = ''
